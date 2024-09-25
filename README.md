@@ -80,3 +80,190 @@ sudo systemctl enable postgresql
 sudo systemctl status postgresql
 ```
 ![11](https://github.com/user-attachments/assets/8d2c45a5-4099-41a9-a3f1-528641c66644)
+
+# Configure PostgreSQL
+
+# 1. Set password for ssh postgres user and admin postgres database password
+
+For security, set a strong password for the system user and default database admin user account. Use the following commands:
+
+```bash
+# Change the ssh user password:
+sudo passwd postgres
+
+# Log in using the Postgres system account:
+su - postgres
+
+# Now, change the admin database password:
+psql -c "ALTER USER postgres WITH PASSWORD 'your-password';"
+exit
+```
+![12](https://github.com/user-attachments/assets/89e50768-1392-4e33-a284-8e5f4cfe527c)
+
+![13](https://github.com/user-attachments/assets/f6a432de-9575-4db5-8265-1a9afb78842a)
+
+```bash
+sudo cp /var/lib/pgsql/data/postgresql.conf /var/lib/pgsql/data/postgresql.conf.bck
+```
+
+![14](https://github.com/user-attachments/assets/c14c5950-83d5-4984-a1ae-bf3910e43d7c)
+
+Edit this file with a text editor:
+
+```bash
+sudo vi /var/lib/pgsql/data/postgresql.conf
+```
+
+![15](https://github.com/user-attachments/assets/647beddf-c333-430b-9a6f-ef6780ce33ea)
+
+By default, PostgreSQL only listens to localhost
+
+
+```bash
+listen_addresses = 'localhost'
+```
+
+if you want to listen all IP addresses:
+
+```bash
+listen_addresses = '*' # what IP address(es) to listen on;
+```
+
+![16](https://github.com/user-attachments/assets/78b1c78d-6375-4f7a-bbee-a31448a36933)
+
+![17](https://github.com/user-attachments/assets/24297afe-1f0a-4711-a62a-17ef3477f867)
+
+# Authentication
+
+For authentication, there is a separate file called pg_hba.conf in the same directory as the primary configuration file.
+
+Before making any changes, back up the configuration file:
+
+```bash
+sudo cp /var/lib/pgsql/data/pg_hba.conf /var/lib/pgsql/data/pg_hba.conf.bck
+```
+
+![18](https://github.com/user-attachments/assets/86f8cdbe-6963-439c-89a6-d99dfa188876)
+
+Edit this file with a text editor:
+
+```bash
+sudo sed -i 's/ident$/md5/' /var/lib/pgsql/data/pg_hba.conf
+```
+
+![19](https://github.com/user-attachments/assets/fb7f6106-5ac5-4b9e-a989-4a0425e69b9e)
+
+To apply all the changes, restart the PostgreSQL service using the following command.
+
+```bash
+sudo systemctl restart postgresql
+```
+
+![20](https://github.com/user-attachments/assets/08e0a40d-2099-4fa5-9080-7f9ba825d658)
+
+# How to Create a User & Database
+
+Use this section to create a new user and database on PostgreSQL:
+
+```bash
+# Connect to the PostgreSQL server as the Postgres user:
+sudo -i -u postgres psql
+
+# Create a new database user:
+CREATE USER yourusername WITH PASSWORD 'password';
+
+# Create a new database:
+CREATE DATABASE database_name;
+
+# Grant all privileges on the database to the user:
+GRANT ALL PRIVILEGES ON DATABASE database_name TO yourusername;
+
+# To list all available PostgreSQL users and databases:
+\l
+```
+
+![21](https://github.com/user-attachments/assets/722108e8-0d75-4ee2-a3c9-2f944e9528a1)
+
+# Accessing the Database
+
+You can access the database you created using the PostgreSQL client command psql. Local or SSH server connection users can use the following syntax:
+
+```bash
+psql -h localhost -U username -d database_name
+```
+![22](https://github.com/user-attachments/assets/bef24462-19e0-4639-863e-76ea2a8e6367)
+
+Remote users can use:
+
+```bash
+psql -h server-ip-address -U username -d database_name
+```
+![23](https://github.com/user-attachments/assets/b4a22b82-5657-4550-adee-fa4fc7b38bd0)
+
+Replace username with the user you created and database_name with the name of the database assigned to that user.
+
+Access the postgres account on your server by typing:
+
+```bash
+sudo -i -u postgres
+```
+
+Now you can immediately access Postgres prompt by typing:
+
+```bash
+$ psql
+postgres.
+
+# To list the databases:
+postgres=# \l
+
+# You can exit Postgres prompt by typing:
+postgres=# \q
+```
+![24](https://github.com/user-attachments/assets/aff55a30-1b7c-45bb-8158-80d43fdb27f6)
+
+To access your PostgreSQL database from external sources, make sure to configure your Amazon Linux EC2 security group to allow incoming traffic on port 5432, which is the default port used by PostgreSQL
+
+
+#Step 1: Stop PostgreSQL Service
+
+Before uninstalling PostgreSQL, ensure that the service is stopped:
+
+```bash
+sudo systemctl stop postgresql
+```
+
+# Step 2: Disable PostgreSQL Service
+
+Prevent PostgreSQL from starting at system boot:
+
+```bash
+sudo systemctl disable postgresql
+```
+
+# Step 3: Remove PostgreSQL Packages
+
+
+Use the following commands to remove PostgreSQL 15 packages. These are the same packages you installed during the installation process:
+
+```bash
+sudo dnf remove postgresql15.x86_64 postgresql15-server
+```
+
+# Step 4: Completely Remove PostgreSQL
+
+After removing the packages, delete all PostgreSQL-related configuration files and data using the following command:
+
+```bash
+sudo rm -rf /var/lib/pgsql /var/log/postgresql /etc/postgresql
+```
+
+# Conclusion
+
+With these steps, you have successfully uninstalled PostgreSQL 15 from your Amazon Linux 2023 instance. Make sure you have backed up any critical data before proceeding with the uninstallation process.
+
+
+
+# Congratulations Your PRoject is run ....
+
+# DELETE AND UNSTALL EC2 INSTANCE AND POSTGRESQL SERVER 
